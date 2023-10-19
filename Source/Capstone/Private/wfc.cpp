@@ -61,34 +61,34 @@ TArray<Awfc::Neighbor> Awfc::get_neighbors_by_tf(location loc)
 {
     TArray<Neighbor> neighborTup;
 
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::WEST] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::WEST] ==
         true &&
         loc.x != 0)
         neighborTup.Add(
             Neighbor(DIRECTION::EAST, location(loc.x - 1, loc.y, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::NORTH] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::NORTH] ==
         true &&
         loc.y != 0)
         neighborTup.Add(
             Neighbor(DIRECTION::SOUTH, location(loc.x, loc.y - 1, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::EAST] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::EAST] ==
         true &&
         loc.x < height - 1)
         neighborTup.Add(
             Neighbor(DIRECTION::WEST, location(loc.x + 1, loc.y, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::SOUTH] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::SOUTH] ==
         true &&
         loc.y < width - 1)
         neighborTup.Add(
             Neighbor(DIRECTION::NORTH, location(loc.x, loc.y + 1, loc.z)));
 
     // NEW CHANGES FOR 3D
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::UP] == true &&
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::UP] == true &&
         loc.z != 0) {
         neighborTup.Add(
             Neighbor(DIRECTION::DOWN, location(loc.x, loc.y, loc.z - 1)));
     }
-    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::DOWN] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::DOWN] ==
         true &&
         loc.z < width - 1) {
         neighborTup.Add(
@@ -107,12 +107,12 @@ Awfc::location Awfc::get_location_with_fewest_choices()
     for (int8 layer = 0; layer < height; layer++) {
         for (int8 row = 0; row < height; row++) {
             for (int8 col = 0; col < height; col++) {
-                if ((int8)tilemap[At(col,row,layer)].superPositionsTSC.Num() < min &&
-                    tilemap[At(col, row, layer)].superPositionsTSC.Num() > 1) {
-                    min = tilemap[At(col, row, layer)].superPositionsTSC.Num();
+                if ((int8)tilemap[At(col,row,layer)]->superPositionsTSC.Num() < min &&
+                    tilemap[At(col, row, layer)]->superPositionsTSC.Num() > 1) {
+                    min = tilemap[At(col, row, layer)]->superPositionsTSC.Num();
                     locs.Empty();
                 }
-                if ((int8)tilemap[At(col, row, layer)].superPositionsTSC.Num() == min) {
+                if ((int8)tilemap[At(col, row, layer)]->superPositionsTSC.Num() == min) {
                     locs.Add(location(col, row, layer));
                 }
             }
@@ -140,7 +140,7 @@ TArray<Awfc::location> Awfc::get_locations_requiring_updates()
         for (int8 row = 0; row < height; row++) {
 //#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < width; col++) {
-                if (tilemap[At(col, row, layer)].needsUpdate)
+                if (tilemap[At(col, row, layer)]->needsUpdate)
                     locs.Add(location(row, col, layer));
             }
         }
@@ -159,7 +159,7 @@ bool Awfc::updatesRequired()
         for (int8 row = 0; row < height; row++) {
     //#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < width; col++) {
-                if (tilemap[At(col, row, layer)].needsUpdate) needsUpdate = true;
+                if (tilemap[At(col, row, layer)]->needsUpdate) needsUpdate = true;
             }
         }
     }
@@ -178,7 +178,7 @@ void Awfc::resetUpdateValues()
 //#pragma omp parallel for num_threads(threads)
         for (int8 row = 0; row < height; row++) {
             for (int8 col = 0; col < width; col++) {
-                tilemap[At(col, row, layer)].needsUpdate = false;
+                tilemap[At(col, row, layer)]->needsUpdate = false;
             }
         }
     }
@@ -201,14 +201,14 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
 
     // Only want to constrain neighbors that haven't collapsed
     if ((int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-        .superPositionsTSC.Num() != 1) {
+        ->superPositionsTSC.Num() != 1) {
         TArray<int8> indicies_to_remove;
         for (int8 i = 0;
             i < (int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-            .superPositionsTSC.Num();
+            ->superPositionsTSC.Num();
             i++) {
             auto searchVal = tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-                .superPositionsTSC[i].GetDefaultObject()
+                ->superPositionsTSC[i].GetDefaultObject()
                 ->connections[(int8)incDirection];
             if (!neighborConstraint.Contains(searchVal)) {
                 // remove superPosition at i
@@ -221,13 +221,13 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
         // source
         for (int8 i = indicies_to_remove.Num() - 1; i >= 0; i--) {
             tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-                .RemoveSuperPositionAtIndex(indicies_to_remove[i]);
+                ->RemoveSuperPositionAtIndex(indicies_to_remove[i]);
         }
     }
 
     // failsafe: if we happen to remove all options for a tile throw an error
     if ((int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-        .superPositionsTSC.Num() == 0) {
+        ->superPositionsTSC.Num() == 0) {
         //cerr << "LocX: " << neighbor.loc.x << " LocY: " << neighbor.loc.y
         //    << "LocZ: " << neighbor.loc.z << endl;
         throw std::runtime_error("No patterns left at location.");
@@ -246,7 +246,7 @@ void Awfc::Propogate(location next_location)
 {
     // sets our starting point for propagation
     resetUpdateValues();
-    tilemap[At(next_location.x, next_location.y, next_location.z)].needsUpdate = true;
+    tilemap[At(next_location.x, next_location.y, next_location.z)]->needsUpdate = true;
 
     // Loop to continue propagating until there are no more tiles that have been
     // constrained
@@ -264,11 +264,11 @@ void Awfc::Propogate(location next_location)
                 // Applying constraints to each neighbor of our source(location)
                 bool wasUpdated = add_constraint(
                     neighbor,
-                    tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)].superPositionsTSC);
+                    tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]->superPositionsTSC);
 
                 // If any constraints were added, mark it as needing to update so we
                 // propagate from this location next
-                tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)].needsUpdate |=
+                tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]->needsUpdate |=
                     wasUpdated;
             }
         }
@@ -287,11 +287,11 @@ void Awfc::Iterate()
         throw(std::runtime_error("No more tiles to collapse!"));
     }
     if ((int8)tilemap[At(next_location.x, next_location.y, next_location.z)]
-        .superPositionsTSC.Num() < 2) {
+        ->superPositionsTSC.Num() < 2) {
         throw(std::runtime_error("No choices at tile location"));
     }
     tilemap[At(next_location.x, next_location.y, next_location.z)]
-        .CollapseSuperPositions();
+        ->CollapseSuperPositions();
     Propogate(next_location);
 }
 
@@ -299,7 +299,7 @@ void Awfc::Iterate()
 // DONE
 void Awfc::IterateSpecific(int8 x, int8 y, int8 z, FString name)
 {
-    tilemap[At(x,y,z)].CollapseSpecific(name);
+    tilemap[At(x,y,z)]->CollapseSpecific(name);
     location collapsed(x, y, z);
     Propogate(collapsed);
 }
@@ -334,9 +334,9 @@ bool Awfc::validate()
 
                     // first element is the connection of the cur tile while the 2nd is
                     // the connection of its touching neighbor
-                    if (tilemap[At(j,i,h)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)cur_dir] !=
+                    if (tilemap[At(j,i,h)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)cur_dir] !=
                         tilemap[At(neighbors[k].loc.x, neighbors[k].loc.y, neighbors[k].loc.z)]
-                        .superPositionsTSC[0].GetDefaultObject()
+                        ->superPositionsTSC[0].GetDefaultObject()
                         ->connections[(int8)neighbor_dir]) {
                         return false;
                     }
@@ -350,8 +350,10 @@ bool Awfc::validate()
 void Awfc::init()
 {
     for (int16 i = 0; i < height * height * height; i++) {
-        //tilemap.Add(NewObject(this, block_class::static_class));
-        //tilemap[i].Init(*initial_bb);
+
+        FVector worldCoords(1, 1, 1);
+
+        tilemap.Add(GetWorld()->SpawnActor<AwfcBlock>(block_class, worldCoords, FRotator()));
     }
 }
 
@@ -362,7 +364,7 @@ bool Awfc::validPath()
     for (int8 z = 0; z < height; z++) {
         for (int8 y = 0; y < height; y++) {
             for (int8 x = 0; x < height; x++) {
-                tilemap[At(x, y, z)].visited = false;
+                tilemap[At(x, y, z)]->visited = false;
 
                 //tilemap[At(x, y, z)].superPositionsTSC[0]->visited = false;
             }
@@ -374,7 +376,7 @@ bool Awfc::validPath()
     //if (tilemap[At(finish.x, finish.y, finish.z)].superPositionsTSC[0]->visited == true) {
 
 
-    if (tilemap[At(finish.x, finish.y, finish.z)].visited == true) {
+    if (tilemap[At(finish.x, finish.y, finish.z)]->visited == true) {
         return true;
     }
     return false;
@@ -387,7 +389,7 @@ void Awfc::validPathRecur(location next)
 
     //tilemap[At(next.x, next.y, next.z)].superPositionsTSC[0]->visited = true;
 
-    tilemap[At(next.x, next.y, next.z)].visited = true;
+    tilemap[At(next.x, next.y, next.z)]->visited = true;
     TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
 
     // debugging
@@ -407,7 +409,7 @@ void Awfc::validPathRecur(location next)
 
 
         if (tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
-            .visited == false) {
+            ->visited == false) {
             validPathRecur(neighbor.loc);
         }
     }
@@ -442,8 +444,8 @@ void Awfc::MazeHelper()
 
 
 
-    tilemap[At(out, 0, 0)].finish = true;
-    tilemap[At(in, height - 1, height - 1)].start = true;
+    tilemap[At(out, 0, 0)]->finish = true;
+    tilemap[At(in, height - 1, height - 1)]->start = true;
 
     // border off T/B except for
     for (int8 h = 0; h < height; h++) {
@@ -469,7 +471,7 @@ void Awfc::Spawn()
         for (int8 y = 0; y < height; y++) {
             for (int8 x = 0; x < height; x++) {
                 FVector worldCoords(10*x, 10*y, 10*z);
-                GetWorld()->SpawnActor<ABuildingBlock>(tilemap[At(x, y,z)].superPositionsTSC[0], worldCoords, FRotator());
+                GetWorld()->SpawnActor<ABuildingBlock>(tilemap[At(x, y,z)]->superPositionsTSC[0], worldCoords, FRotator());
             }
         }
     }
@@ -487,7 +489,7 @@ void Awfc::LogTilemap() {
         
             FString tiles = "[ ";
             for (int8 x = 0; x < height; x++) {
-                tiles += FString::FromInt(tilemap[At(x,y,z)].superPositionsTSC[0].GetDefaultObject()->density);
+                tiles += FString::FromInt(tilemap[At(x,y,z)]->superPositionsTSC[0].GetDefaultObject()->density);
                 tiles += " ";
             }
             tiles += "]";

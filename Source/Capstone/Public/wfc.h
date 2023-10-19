@@ -46,7 +46,7 @@ protected:
 	UPROPERTY(EditAnywhere, category = "wfc_data")
 	int8 height;
 	int8 width;
-	TArray<AwfcBlock> tilemap; 
+	TArray<AwfcBlock*> tilemap; 
 	location start;
 	location finish; 
 
