@@ -13,5 +13,9 @@ UCLASS()
 class CAPSTONE_API UBuildingBlockDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "data")
+	TArray<TSubclassOf<class ABuildingBlock>> initial_blocks;
 	
 };

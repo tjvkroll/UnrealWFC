@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "BuildingBlockDataAsset.h"
 #include "wfcBlock.h"
 #include "wfc.generated.h"
 
@@ -41,11 +42,17 @@ class CAPSTONE_API Awfc : public AActor
 	};
 protected:
 	int8 threads;
+
+	UPROPERTY(EditAnywhere, category = "wfc_data")
 	int8 height;
 	int8 width;
-	TArray<TArray<TArray<AwfcBlock*>>> tilemap;
+	TArray<AwfcBlock> tilemap; 
 	location start;
 	location finish; 
+
+	UPROPERTY(EditDefaultsOnly, category = "wfc_data")
+	TSubclassOf<AwfcBlock> block_class; 
+
 
 	struct Neighbor {
 		Neighbor(DIRECTION d, location l) : dir(d), loc(l) {}
@@ -59,14 +66,24 @@ protected:
 	bool updatesRequired();
 	void resetUpdateValues();
 	bool add_constraint(Neighbor& neighbor,
-		TArray<ABuildingBlock*>& sourceSuperPositions);
+		TArray<TSubclassOf<ABuildingBlock>>& sourceSuperPositions);
 	TArray<Neighbor> get_neighbors_by_tf(location loc);
 
 
 public:	
-	TArray<TArray<TArray<AwfcBlock*>>> GetTilemap();
-	int8 GetNumThreads();
-	void SetTilemap(TArray<TArray<TArray<AwfcBlock*>>> map);
+
+	// Need 3d TArray struct????
+	Awfc(){}
+
+	//Awfc(int8 height, int8 num_threads, AwfcBlock choices) : threads(num_threads) {
+	//	//tilemap.Init(choices, height * height * height);
+	//}
+
+	int16  At(int8 x, int8 y, int8 z);
+	//TArray<TArray<TArray<AwfcBlock*>>> GetTilemap();
+	//int8 GetNumThreads();
+	//void SetTilemap(TArray<TArray<TArray<AwfcBlock*>>> map);
+	void init();
 	void Propogate(location next_location);
 	void Iterate();
 	void IterateSpecific(int8 x, int8 y, int8 z, FString name);
@@ -74,6 +91,7 @@ public:
 	bool validPath();
 	void validPathRecur(location next);
 	void MazeHelper();
+	void Spawn();
 
 	UFUNCTION(BlueprintCallable)
 	void CreateMaze();
@@ -81,3 +99,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LogTilemap();
 };
+
+
+
+
+
+

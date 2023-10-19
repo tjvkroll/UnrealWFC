@@ -5,12 +5,12 @@
 int8 AwfcBlock::RandomBasedOnWeights() {
     // Approach implemented from: https://www.keithschwarz.com/darts-dice-coins/
     int32 sum_weights = 0;
-    for (int8 i = 0; i < superPositions.Num(); i++) {
+    for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
         //sum_weights += superPositions[i]->weight;
         sum_weights += Cast<ABuildingBlock>(superPositionsTSC[i])->weight;
     }
     TArray<int8> probs;
-    for (int8 i = 0; i < superPositions.Num(); i++) {
+    for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
         //for (int j = 0; j < superPositions[i]->weight; j++) {
         for (int j = 0; j < Cast<ABuildingBlock>(superPositionsTSC[i])->weight; j++) {
             probs.Add(i);
@@ -22,53 +22,60 @@ int8 AwfcBlock::RandomBasedOnWeights() {
 
 
 
+void AwfcBlock::Init()
+{
+    for (auto& block : initial_bb->initial_blocks) {
+        superPositionsTSC.Add(block);
+    }
+}
+
 // Choosing a BUILDING BLOCK OUT OF REMAINING OPTIONS
 void AwfcBlock::CollapseSuperPositions() {
     int rnd = RandomBasedOnWeights();
 
-    for (int8 i = superPositions.Num() - 1; i > rnd; i--) {
-        superPositions.RemoveAt(i); 
+    for (int8 i = superPositionsTSC.Num() - 1; i > rnd; i--) {
+        superPositionsTSC.RemoveAt(i); 
     }
 
     for (int8 i = rnd-1; i >= 0; i--) {
-        superPositions.RemoveAt(i); 
+        superPositionsTSC.RemoveAt(i); 
     }
 
 
     // old way of doing it. 
 
 //    ABuildingBlock tmp = superPositions[rnd];
-//    superPositions.Empty();
-//    superPositions.Add(tmp);
+//    superPositionsTSC.Empty();
+//    superPositionsTSC.Add(tmp);
 }
 
 // Allowing for collapsing of specific tiles so we can force images
 void AwfcBlock::CollapseSpecific(FString name) {
     int8 saveIdx = 0; 
-    for (int8 i = 0; i < superPositions.Num(); i++) {
+    for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
         //if (superPositions[i]->name == name) {
         if (Cast<ABuildingBlock>(superPositionsTSC[i])->name == name) {
             saveIdx = i; 
             break; 
             //OLD WAY OF DOING IT
             //ABuildingBlock tmp = index;
-            //superPositions.Empty();
-            //superPositions.Add(tmp);
+            //superPositionsTSC.Empty();
+            //superPositionsTSC.Add(tmp);
         }
     }
 
-    for (int8 i = superPositions.Num() - 1; i > saveIdx; i--) {
-        superPositions.RemoveAt(i);
+    for (int8 i = superPositionsTSC.Num() - 1; i > saveIdx; i--) {
+        superPositionsTSC.RemoveAt(i);
     }
 
     for (int8 i = saveIdx - 1; i >= 0; i--) {
-        superPositions.RemoveAt(i);
+        superPositionsTSC.RemoveAt(i);
     }
 }
 
 // removing BUILDING BLOCKS
 void AwfcBlock::RemoveSuperPositionAtIndex(int8 index) {
-    superPositions.RemoveAt(index);
+    superPositionsTSC.RemoveAt(index);
 }
 
 // returns the mirror of any given direction, used in find all neighbors

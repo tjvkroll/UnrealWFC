@@ -31,14 +31,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Block Data")
 	int8 density = 0;
 
-	UPROPERTY(EditAnywhere, Category = "Block Data")
-	bool visited = false;
+	//UPROPERTY(EditAnywhere, Category = "Block Data")
+	//bool visited = false;
 
-	UPROPERTY(EditAnywhere, Category = "Block Data")
-	bool start = false;
+	//UPROPERTY(EditAnywhere, Category = "Block Data")
+	//bool start = false;
 
-	UPROPERTY(EditAnywhere, Category = "Block Data")
-	bool finish = false;
+	//UPROPERTY(EditAnywhere, Category = "Block Data")
+	//bool finish = false;
 
 };
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "BuildingBlockDataAsset.h"
 #include "Containers/Array.h"
 #include "Containers/UnrealString.h"
 #include "BuildingBlock.h"
@@ -31,20 +32,34 @@ class CAPSTONE_API AwfcBlock : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AwfcBlock() {};
+	AwfcBlock() {
+		Init();
+	};	
 
-public:	
+	UPROPERTY(EditDefaultsOnly, category = "block_data")
+	UBuildingBlockDataAsset* initial_bb;
 
-	AwfcBlock(const TArray<ABuildingBlock*>& bb) : superPositions(bb) {};
+	//AwfcBlock(const TArray<ABuildingBlock*>& bb) : superPositions(bb) {};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Block Data")
-	TArray<ABuildingBlock*> superPositions; 
+	//UPROPERTY(EditDefaultsOnly, Category = "Block Data")
+	//TArray<ABuildingBlock*> superPositions; 
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Block Data")
 	TArray<TSubclassOf<ABuildingBlock>> superPositionsTSC;
 
+	UPROPERTY(EditAnywhere, Category = "Block Data")
+	bool visited = false;
+
+	UPROPERTY(EditAnywhere, Category = "Block Data")
+	bool start = false;
+
+	UPROPERTY(EditAnywhere, Category = "Block Data")
+	bool finish = false;
+
 	bool needsUpdate = false;
+
+	void Init(); 
 
 	void CollapseSuperPositions();
 

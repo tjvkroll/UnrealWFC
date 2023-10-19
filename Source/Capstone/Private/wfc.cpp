@@ -3,23 +3,28 @@
 
 #include "wfc.h"
 
-// DONE
-TArray<TArray<TArray<AwfcBlock*>>> Awfc::GetTilemap()
+int16 Awfc::At(int8 x, int8 y, int8 z)
 {
-	return tilemap;
+    return (z * height) + (y * height) + z; 
 }
 
-// DONE
-int8 Awfc::GetNumThreads()
-{
-	return threads;
-}
+//// DONE
+//TArray<TArray<TArray<AwfcBlock*>>> Awfc::GetTilemap()
+//{
+//	return tilemap;
+//}
 
 // DONE
-void Awfc::SetTilemap(TArray<TArray<TArray<AwfcBlock*>>> map)
-{
-	tilemap = map; 
-}
+//int8 Awfc::GetNumThreads()
+//{
+//	return threads;
+//}
+
+//// DONE
+//void Awfc::SetTilemap(TArray<TArray<TArray<AwfcBlock*>>> map)
+//{
+//	tilemap = map; 
+//}
 
 // DONE 
 TArray<Awfc::Neighbor> Awfc::get_neighbors(location loc, int8 h)
@@ -56,34 +61,34 @@ TArray<Awfc::Neighbor> Awfc::get_neighbors_by_tf(location loc)
 {
     TArray<Neighbor> neighborTup;
 
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::WEST] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::WEST] ==
         true &&
         loc.x != 0)
         neighborTup.Add(
             Neighbor(DIRECTION::EAST, location(loc.x - 1, loc.y, loc.z)));
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::NORTH] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::NORTH] ==
         true &&
         loc.y != 0)
         neighborTup.Add(
             Neighbor(DIRECTION::SOUTH, location(loc.x, loc.y - 1, loc.z)));
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::EAST] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::EAST] ==
         true &&
         loc.x < height - 1)
         neighborTup.Add(
             Neighbor(DIRECTION::WEST, location(loc.x + 1, loc.y, loc.z)));
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::SOUTH] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::SOUTH] ==
         true &&
         loc.y < width - 1)
         neighborTup.Add(
             Neighbor(DIRECTION::NORTH, location(loc.x, loc.y + 1, loc.z)));
 
     // NEW CHANGES FOR 3D
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::UP] == true &&
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::UP] == true &&
         loc.z != 0) {
         neighborTup.Add(
             Neighbor(DIRECTION::DOWN, location(loc.x, loc.y, loc.z - 1)));
     }
-    if (tilemap[loc.z][loc.y][loc.x]->superPositions[0]->connections[(int8)DIRECTION::DOWN] ==
+    if (tilemap[At(loc.x, loc.y, loc.z)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::DOWN] ==
         true &&
         loc.z < width - 1) {
         neighborTup.Add(
@@ -102,12 +107,12 @@ Awfc::location Awfc::get_location_with_fewest_choices()
     for (int8 layer = 0; layer < height; layer++) {
         for (int8 row = 0; row < height; row++) {
             for (int8 col = 0; col < height; col++) {
-                if ((int8)tilemap[layer][row][col]->superPositions.Num() < min &&
-                    tilemap[layer][row][col]->superPositions.Num() > 1) {
-                    min = tilemap[layer][row][col]->superPositions.Num();
+                if ((int8)tilemap[At(col,row,layer)].superPositionsTSC.Num() < min &&
+                    tilemap[At(col, row, layer)].superPositionsTSC.Num() > 1) {
+                    min = tilemap[At(col, row, layer)].superPositionsTSC.Num();
                     locs.Empty();
                 }
-                if ((int8)tilemap[layer][row][col]->superPositions.Num() == min) {
+                if ((int8)tilemap[At(col, row, layer)].superPositionsTSC.Num() == min) {
                     locs.Add(location(col, row, layer));
                 }
             }
@@ -135,7 +140,7 @@ TArray<Awfc::location> Awfc::get_locations_requiring_updates()
         for (int8 row = 0; row < height; row++) {
 //#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < width; col++) {
-                if (tilemap[layer][row][col]->needsUpdate)
+                if (tilemap[At(col, row, layer)].needsUpdate)
                     locs.Add(location(row, col, layer));
             }
         }
@@ -154,12 +159,17 @@ bool Awfc::updatesRequired()
         for (int8 row = 0; row < height; row++) {
     //#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < width; col++) {
-                if (tilemap[layer][row][col]->needsUpdate) needsUpdate = true;
+                if (tilemap[At(col, row, layer)].needsUpdate) needsUpdate = true;
             }
         }
     }
     return needsUpdate;
 }
+
+
+
+
+// DEALING WITH INSTANCE OF BLOCKS
 
 // DONE
 void Awfc::resetUpdateValues()
@@ -168,7 +178,7 @@ void Awfc::resetUpdateValues()
 //#pragma omp parallel for num_threads(threads)
         for (int8 row = 0; row < height; row++) {
             for (int8 col = 0; col < width; col++) {
-                tilemap[layer][row][col]->needsUpdate = false;
+                tilemap[At(col, row, layer)].needsUpdate = false;
             }
         }
     }
@@ -176,7 +186,7 @@ void Awfc::resetUpdateValues()
 
 
 // WIP 
-bool Awfc::add_constraint(Neighbor& neighbor, TArray<ABuildingBlock*>& sourceSuperPositions)
+bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>>& sourceSuperPositions)
 {
     // Get the sides of each tile we'll be constraining by
     DIRECTION incDirection = neighbor.dir;
@@ -186,19 +196,19 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<ABuildingBlock*>& sourceSup
 
     // Get set of constraints from our source tile
     for (auto& superPosition : sourceSuperPositions) {
-        neighborConstraint.Add(superPosition->connections[(int8)outDirection]);
+        neighborConstraint.Add(superPosition.GetDefaultObject()->connections[(int8)outDirection]);
     }
 
     // Only want to constrain neighbors that haven't collapsed
-    if ((int8)tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-        ->superPositions.Num() != 1) {
+    if ((int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+        .superPositionsTSC.Num() != 1) {
         TArray<int8> indicies_to_remove;
         for (int8 i = 0;
-            i < (int8)tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-            ->superPositions.Num();
+            i < (int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+            .superPositionsTSC.Num();
             i++) {
-            auto searchVal = tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-                ->superPositions[i]
+            auto searchVal = tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+                .superPositionsTSC[i].GetDefaultObject()
                 ->connections[(int8)incDirection];
             if (!neighborConstraint.Contains(searchVal)) {
                 // remove superPosition at i
@@ -210,14 +220,14 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<ABuildingBlock*>& sourceSup
         // Remove building blocks that don't fit based on the constraints of our
         // source
         for (int8 i = indicies_to_remove.Num() - 1; i >= 0; i--) {
-            tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-                ->RemoveSuperPositionAtIndex(indicies_to_remove[i]);
+            tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+                .RemoveSuperPositionAtIndex(indicies_to_remove[i]);
         }
     }
 
     // failsafe: if we happen to remove all options for a tile throw an error
-    if ((int8)tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-        ->superPositions.Num() == 0) {
+    if ((int8)tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+        .superPositionsTSC.Num() == 0) {
         //cerr << "LocX: " << neighbor.loc.x << " LocY: " << neighbor.loc.y
         //    << "LocZ: " << neighbor.loc.z << endl;
         throw std::runtime_error("No patterns left at location.");
@@ -226,12 +236,17 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<ABuildingBlock*>& sourceSup
 }
 
 
+
+
+
+// DEALING WITH INSTANCE OF BLOCKS  (266-267)
+
 // DONE? 
 void Awfc::Propogate(location next_location)
 {
     // sets our starting point for propagation
     resetUpdateValues();
-    tilemap[next_location.z][next_location.x][next_location.y]->needsUpdate = true;
+    tilemap[At(next_location.x, next_location.y, next_location.z)].needsUpdate = true;
 
     // Loop to continue propagating until there are no more tiles that have been
     // constrained
@@ -249,11 +264,11 @@ void Awfc::Propogate(location next_location)
                 // Applying constraints to each neighbor of our source(location)
                 bool wasUpdated = add_constraint(
                     neighbor,
-                    tilemap[location.z][location.y][location.x]->superPositions);
+                    tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)].superPositionsTSC);
 
                 // If any constraints were added, mark it as needing to update so we
                 // propagate from this location next
-                tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]->needsUpdate |=
+                tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)].needsUpdate |=
                     wasUpdated;
             }
         }
@@ -271,12 +286,12 @@ void Awfc::Iterate()
     if (next_location.x == -1) {
         throw(std::runtime_error("No more tiles to collapse!"));
     }
-    if ((int8)tilemap[next_location.z][next_location.y][next_location.x]
-        ->superPositions.Num() < 2) {
+    if ((int8)tilemap[At(next_location.x, next_location.y, next_location.z)]
+        .superPositionsTSC.Num() < 2) {
         throw(std::runtime_error("No choices at tile location"));
     }
-    tilemap[next_location.z][next_location.y][next_location.x]
-        ->CollapseSuperPositions();
+    tilemap[At(next_location.x, next_location.y, next_location.z)]
+        .CollapseSuperPositions();
     Propogate(next_location);
 }
 
@@ -284,7 +299,7 @@ void Awfc::Iterate()
 // DONE
 void Awfc::IterateSpecific(int8 x, int8 y, int8 z, FString name)
 {
-    tilemap[z][y][x]->CollapseSpecific(name);
+    tilemap[At(x,y,z)].CollapseSpecific(name);
     location collapsed(x, y, z);
     Propogate(collapsed);
 }
@@ -306,23 +321,22 @@ bool Awfc::validate()
                     DIRECTION cur_dir = reverse(neighbor_dir);
 
                     // cout << "\nComparing home dir:" << cur_dir << boolalpha << " conn:"
-                    //      << tilemap[i][j].superPositions[0].connections[cur_dir]
-                    //      << "   type:" << tilemap[i][j].superPositions[0].density
+                    //      << tilemap[i][j].superPositionsTSC[0].connections[cur_dir]
+                    //      << "   type:" << tilemap[i][j].superPositionsTSC[0].density
                     //      << " \nTo neighbor dir:" << neighbor_dir << "   conn:"
                     //      << tilemap[neighbors[k].loc.y][neighbors[k].loc.x]
-                    //             .superPositions[0]
+                    //             .superPositionsTSC[0]
                     //             .connections[neighbor_dir]
                     //      << "   type:"
                     //      << tilemap[neighbors[k].loc.y][neighbors[k].loc.x]
-                    //             .superPositions[0]
+                    //             .superPositionsTSC[0]
                     //             .density;
 
                     // first element is the connection of the cur tile while the 2nd is
                     // the connection of its touching neighbor
-                    if (tilemap[h][i][j]->superPositions[0]->connections[(int8)cur_dir] !=
-                        tilemap[neighbors[k].loc.z][neighbors[k].loc.y]
-                        [neighbors[k].loc.x]
-                        ->superPositions[0]
+                    if (tilemap[At(j,i,h)].superPositionsTSC[0].GetDefaultObject()->connections[(int8)cur_dir] !=
+                        tilemap[At(neighbors[k].loc.x, neighbors[k].loc.y, neighbors[k].loc.z)]
+                        .superPositionsTSC[0].GetDefaultObject()
                         ->connections[(int8)neighbor_dir]) {
                         return false;
                     }
@@ -333,20 +347,34 @@ bool Awfc::validate()
     return true;
 }
 
+void Awfc::init()
+{
+    for (int16 i = 0; i < height * height * height; i++) {
+        //tilemap.Add(NewObject(this, block_class::static_class));
+        //tilemap[i].Init(*initial_bb);
+    }
+}
+
 
 // DONE
 bool Awfc::validPath()
 {
-    for (auto& layer : tilemap) {
-        for (auto& row : layer) {
-            for (auto& tile : row) {
-                tile->superPositions[0]->visited = false;
+    for (int8 z = 0; z < height; z++) {
+        for (int8 y = 0; y < height; y++) {
+            for (int8 x = 0; x < height; x++) {
+                tilemap[At(x, y, z)].visited = false;
+
+                //tilemap[At(x, y, z)].superPositionsTSC[0]->visited = false;
             }
         }
     }
     validPathRecur(location(start.x, start.y, start.z));
+    
+    // was before moving visited, start, finish ect to AwfcBlock
+    //if (tilemap[At(finish.x, finish.y, finish.z)].superPositionsTSC[0]->visited == true) {
 
-    if (tilemap[finish.z][finish.y][finish.x]->superPositions[0]->visited == true) {
+
+    if (tilemap[At(finish.x, finish.y, finish.z)].visited == true) {
         return true;
     }
     return false;
@@ -356,12 +384,15 @@ bool Awfc::validPath()
 // DONE
 void Awfc::validPathRecur(location next)
 {
-    tilemap[next.z][next.y][next.x]->superPositions[0]->visited = true;
+
+    //tilemap[At(next.x, next.y, next.z)].superPositionsTSC[0]->visited = true;
+
+    tilemap[At(next.x, next.y, next.z)].visited = true;
     TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
 
     // debugging
     // cout << "Looking at "
-    //      << tilemap[next.z][next.y][next.x].superPositions[0].name << " tile.
+    //      << tilemap[next.z][next.y][next.x].superPositionsTSC[0].name << " tile.
     //      ";
     // cout << "# of neighbors at this tile: " << tile_neighbors.size() << endl;
 
@@ -369,9 +400,14 @@ void Awfc::validPathRecur(location next)
         // cout << "\t NEIGHBOR: " << endl;
         // neighbor.loc.Display();
         // if not at the end then keep searching
-        if (tilemap[neighbor.loc.z][neighbor.loc.y][neighbor.loc.x]
-            ->superPositions[0]
-            ->visited == false) {
+
+        //if (tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+        //    .superPositionsTSC[0]
+        //    ->visited == false) {
+
+
+        if (tilemap[At(neighbor.loc.x, neighbor.loc.y, neighbor.loc.z)]
+            .visited == false) {
             validPathRecur(neighbor.loc);
         }
     }
@@ -399,8 +435,15 @@ void Awfc::MazeHelper()
     // setting in and out
     IterateSpecific(out, 0, 0, "vertPipe");
     IterateSpecific(in, height - 1, height - 1, "vertPipe");
-    tilemap[0][0][out]->superPositions[0]->finish = true;
-    tilemap[height - 1][height - 1][in]->superPositions[0]->start = true;
+
+    // Before moving start finish visited to AwfcBlock
+    /*tilemap[At(out, 0, 0)].superPositionsTSC[0]->finish = true;
+    tilemap[At(in, height - 1, height - 1)].superPositionsTSC[0]->start = true;*/
+
+
+
+    tilemap[At(out, 0, 0)].finish = true;
+    tilemap[At(in, height - 1, height - 1)].start = true;
 
     // border off T/B except for
     for (int8 h = 0; h < height; h++) {
@@ -420,18 +463,31 @@ void Awfc::MazeHelper()
     }
 }
 
+void Awfc::Spawn()
+{
+    for (int8 z = 0; z < height; z++) {
+        for (int8 y = 0; y < height; y++) {
+            for (int8 x = 0; x < height; x++) {
+                FVector worldCoords(10*x, 10*y, 10*z);
+                GetWorld()->SpawnActor<ABuildingBlock>(tilemap[At(x, y,z)].superPositionsTSC[0], worldCoords, FRotator());
+            }
+        }
+    }
+
+}
+
 
 // Debugging helper mostly : NOT CURRENTLY BEING CALLED
 void Awfc::LogTilemap() {
 
     int8 count = 0; 
-    for (auto& layer : tilemap) {
+    for (int8 z = 0; z < height; z++) {
         UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), count);
-        for (auto& row : layer) {
+        for (int8 y = 0; y < height; y++) {
         
             FString tiles = "[ ";
-            for (auto tile : row) {
-                tiles += FString::FromInt(tile->superPositions[0]->density);
+            for (int8 x = 0; x < height; x++) {
+                tiles += FString::FromInt(tilemap[At(x,y,z)].superPositionsTSC[0].GetDefaultObject()->density);
                 tiles += " ";
             }
             tiles += "]";
@@ -452,6 +508,9 @@ void Awfc::CreateMaze() {
             break;
         }
     }
+    validate();
+    validPath();
     LogTilemap();
+    Spawn();
     //UE_LOG(LogTemp, Warning, TEXT("Successful?: %s"), validate ? "True" : "False");
 }
