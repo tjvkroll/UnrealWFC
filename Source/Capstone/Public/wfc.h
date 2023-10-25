@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BuildingBlockDataAsset.h"
+#include "BuildingBlock.h"
 #include "wfcBlock.h"
 #include "wfc.generated.h"
 
@@ -19,10 +20,6 @@ class CAPSTONE_API Awfc : public AActor
 {
 	GENERATED_BODY()
 
-	/*
-	  NOTE: THE size of the member variables here
-	  limit the maze dimensions to 255 (should be more than enough
-	*/
 	
 	struct location {
 		location() {
@@ -35,9 +32,7 @@ class CAPSTONE_API Awfc : public AActor
 		int8 y; 
 		int8 z;
 		void Display() {
-			UE_LOG(LogTemp, Warning, TEXT("X: %d"), x);
-			UE_LOG(LogTemp, Warning, TEXT("Y: %d"), y);
-			UE_LOG(LogTemp, Warning, TEXT("Z: %d"), z);
+			UE_LOG(LogTemp, Warning, TEXT("X: %d Y: %d Z: %d"), x, y , z);
 		}
 	};
 protected:
@@ -45,6 +40,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, category = "wfc_data")
 	int8 height;
+
+	UPROPERTY(EditAnywhere, category = "wfc_data")
+	int LocationOffset;
+
 	int8 width;
 	TArray<AwfcBlock*> tilemap; 
 	location start;
@@ -74,12 +73,14 @@ public:
 
 	// Need 3d TArray struct????
 	Awfc(){}
-
+	virtual void BeginPlay() override;
 	//Awfc(int8 height, int8 num_threads, AwfcBlock choices) : threads(num_threads) {
 	//	//tilemap.Init(choices, height * height * height);
 	//}
 
 	int16  At(int8 x, int8 y, int8 z);
+	int16  At(const Neighbor& n) const;
+	int16  At(const location& n) const;
 	//TArray<TArray<TArray<AwfcBlock*>>> GetTilemap();
 	//int8 GetNumThreads();
 	//void SetTilemap(TArray<TArray<TArray<AwfcBlock*>>> map);
@@ -91,13 +92,14 @@ public:
 	bool validPath();
 	void validPathRecur(location next);
 	void MazeHelper();
-	void Spawn();
 
 	UFUNCTION(BlueprintCallable)
 	void CreateMaze();
 	
 	UFUNCTION(BlueprintCallable)
 	void LogTilemap();
+
+	void Solidify();
 };
 
 

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "BuildingBlock.generated.h"
 
+class UStaticMeshComponent;
 
 UCLASS(BlueprintType)
 class CAPSTONE_API ABuildingBlock : public AActor
@@ -14,7 +15,6 @@ class CAPSTONE_API ABuildingBlock : public AActor
 
 public:
 	ABuildingBlock() {};
-	//ABuildingBlock(const ABuildingBlock&){};
 
 	ABuildingBlock(FString n, TArray<bool> s, int8 w, int8 d)
 		: name(n), connections(s), weight(w), density(d) {}
@@ -31,14 +31,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Block Data")
 	int8 density = 0;
 
-	//UPROPERTY(EditAnywhere, Category = "Block Data")
-	//bool visited = false;
-
-	//UPROPERTY(EditAnywhere, Category = "Block Data")
-	//bool start = false;
-
-	//UPROPERTY(EditAnywhere, Category = "Block Data")
-	//bool finish = false;
 
 };
 

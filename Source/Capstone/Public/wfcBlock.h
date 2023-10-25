@@ -32,9 +32,7 @@ class CAPSTONE_API AwfcBlock : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AwfcBlock() {
-		Init();
-	};	
+	AwfcBlock() {};
 
 	UPROPERTY(EditDefaultsOnly, category = "block_data")
 	UBuildingBlockDataAsset* initial_bb;
@@ -45,7 +43,7 @@ public:
 	//TArray<ABuildingBlock*> superPositions; 
 
 
-	UPROPERTY(EditDefaultsOnly, Category = "Block Data")
+	UPROPERTY(EditAnywhere, Category = "Block Data")
 	TArray<TSubclassOf<ABuildingBlock>> superPositionsTSC;
 
 	UPROPERTY(EditAnywhere, Category = "Block Data")
@@ -59,7 +57,7 @@ public:
 
 	bool needsUpdate = false;
 
-	void Init(); 
+	void Init();
 
 	void CollapseSuperPositions();
 
@@ -69,6 +67,5 @@ public:
 
 	int8 RandomBasedOnWeights();
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnBB(int x, int y, int z);
+	void Solidify();
 };

@@ -7,17 +7,24 @@ int8 AwfcBlock::RandomBasedOnWeights() {
     int32 sum_weights = 0;
     for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
         //sum_weights += superPositions[i]->weight;
-        sum_weights += Cast<ABuildingBlock>(superPositionsTSC[i])->weight;
+        sum_weights += superPositionsTSC[i].GetDefaultObject()->weight;
     }
     TArray<int8> probs;
     for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
         //for (int j = 0; j < superPositions[i]->weight; j++) {
-        for (int j = 0; j < Cast<ABuildingBlock>(superPositionsTSC[i])->weight; j++) {
+        for (int j = 0; j < superPositionsTSC[i].GetDefaultObject()->weight; j++) {
             probs.Add(i);
         }
     }
     int random_idx = rand() % probs.Num();
     return probs[random_idx];
+}
+
+void AwfcBlock::Solidify()
+{
+    //if (superPositionsTSC.Num() > 0) {
+        GetWorld()->SpawnActor<ABuildingBlock>(superPositionsTSC[0], GetActorLocation(),FRotator());
+    //}
 }
 
 
@@ -53,8 +60,8 @@ void AwfcBlock::CollapseSuperPositions() {
 void AwfcBlock::CollapseSpecific(FString name) {
     int8 saveIdx = 0; 
     for (int8 i = 0; i < superPositionsTSC.Num(); i++) {
-        //if (superPositions[i]->name == name) {
-        if (Cast<ABuildingBlock>(superPositionsTSC[i])->name == name) {
+        //if (superPositions[i]->name == name) 
+        if (superPositionsTSC[i].GetDefaultObject()->name == name) {
             saveIdx = i; 
             break; 
             //OLD WAY OF DOING IT
@@ -105,12 +112,4 @@ DIRECTION reverse(DIRECTION dir) {
     }
     UE_LOG(LogTemp, Warning, TEXT("NO VALID REVERSE!!!! RETURNING NORTH AS DEFAULT"));
     return DIRECTION::NORTH;
-}
-
-
-
-void AwfcBlock::SpawnBB(int x, int y, int z)
-{
-    FVector worldCoords(x, y, z);
-    GetWorld()->SpawnActor<ABuildingBlock>(superPositionsTSC[0], worldCoords, FRotator());
 }
