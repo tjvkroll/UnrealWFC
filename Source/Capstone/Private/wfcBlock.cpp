@@ -20,10 +20,10 @@ int8 AwfcBlock::RandomBasedOnWeights() {
     return probs[random_idx];
 }
 
-void AwfcBlock::Solidify()
+ABuildingBlock* AwfcBlock::Solidify()
 {
     //if (superPositionsTSC.Num() > 0) {
-        GetWorld()->SpawnActor<ABuildingBlock>(superPositionsTSC[0], GetActorLocation(),FRotator());
+        return GetWorld()->SpawnActor<ABuildingBlock>(superPositionsTSC[0], GetActorLocation(),FRotator());
     //}
 }
 
@@ -47,13 +47,6 @@ void AwfcBlock::CollapseSuperPositions() {
     for (int8 i = rnd-1; i >= 0; i--) {
         superPositionsTSC.RemoveAt(i); 
     }
-
-
-    // old way of doing it. 
-
-//    ABuildingBlock tmp = superPositions[rnd];
-//    superPositionsTSC.Empty();
-//    superPositionsTSC.Add(tmp);
 }
 
 // Allowing for collapsing of specific tiles so we can force images
@@ -64,17 +57,11 @@ void AwfcBlock::CollapseSpecific(FString name) {
         if (superPositionsTSC[i].GetDefaultObject()->name == name) {
             saveIdx = i; 
             break; 
-            //OLD WAY OF DOING IT
-            //ABuildingBlock tmp = index;
-            //superPositionsTSC.Empty();
-            //superPositionsTSC.Add(tmp);
         }
     }
-
     for (int8 i = superPositionsTSC.Num() - 1; i > saveIdx; i--) {
         superPositionsTSC.RemoveAt(i);
     }
-
     for (int8 i = saveIdx - 1; i >= 0; i--) {
         superPositionsTSC.RemoveAt(i);
     }

@@ -67,5 +67,5 @@ public:
 
 	int8 RandomBasedOnWeights();
 
-	void Solidify();
+	ABuildingBlock* Solidify();
 };

@@ -31,6 +31,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Block Data")
 	int8 density = 0;
 
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* MaterialRef;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void HighlightBlock(bool IsInPath);
 };
 
