@@ -20,7 +20,8 @@ enum class DIRECTION : uint8 {
 	WEST = 2,
 	EAST = 3,
 	UP = 4, 
-	DOWN = 5
+	DOWN = 5, 
+	ANY = 6
 };
 
 DIRECTION reverse(DIRECTION dir);

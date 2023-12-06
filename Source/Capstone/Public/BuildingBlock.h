@@ -34,7 +34,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* MaterialRef;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void HighlightBlock(bool IsInPath);
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void HighlightBlock(bool IsInPath);
 };
 

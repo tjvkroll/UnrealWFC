@@ -47,7 +47,7 @@ protected:
 	int LocationOffset;
 
 	TArray<ABuildingBlock*> BB_refs; 
-
+	bool finish_found; 
 	int8 width;
 	TArray<AwfcBlock*> tilemap;
 
@@ -74,6 +74,10 @@ protected:
 	bool add_constraint(Neighbor& neighbor,
 		TArray<TSubclassOf<ABuildingBlock>>& sourceSuperPositions);
 	TArray<Neighbor> get_neighbors_by_tf(Flocation loc);
+	TArray<Neighbor> RM_get_neighbors_by_tf(Flocation loc);
+	TArray<Neighbor> UM_get_neighbors_by_tf(Flocation loc);
+	bool CheckDirection(Flocation loc, DIRECTION dir);
+
 
 
 public:	
@@ -86,7 +90,9 @@ public:
 	int16  At(const Neighbor& n) const;
 	int16  At(const Flocation& n) const;
 
+	UPROPERTY(BlueprintReadWrite)
 	bool Already_Generated = false;
+	UPROPERTY(BlueprintReadWrite)
 	bool Already_Solved = false; 
 
 
@@ -99,34 +105,41 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	int LMP_steps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	int LMP_solved;
+	bool LMP_solved = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	TArray<Flocation> RightMostPath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	int RMP_steps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	int RMP_solved;
+	bool RMP_solved = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	TArray<Flocation> UpMostPath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	int UMP_steps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	int UMP_solved;
+	bool UMP_solved = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	TArray<Flocation> RandomPath;
+	TArray<Flocation> EuclidianPath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	int Rando_steps;
+	int Euclidian_steps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
-	bool Rando_solved = false;
+	bool Euclidian_solved = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool Visualize_LMP = false;
+	UPROPERTY(BlueprintReadWrite)
+	bool Visualize_RMP = false;
+	UPROPERTY(BlueprintReadWrite)
+	bool Visualize_UMP = false;
+	UPROPERTY(BlueprintReadWrite)
+	bool Visualize_Euclidian = false;
 
 
 	UFUNCTION(BlueprintCallable)
 	void ClearTiles();
-	UFUNCTION(BlueprintCallable)
-	void HighlightLocations(TArray<Flocation> path);
 	UFUNCTION(BlueprintCallable)
 	void WFCInit();
 	UFUNCTION(BlueprintCallable)
@@ -140,10 +153,18 @@ public:
 	void LeftMostPathRecur(Flocation next);
 	void RightMostPathRecur(Flocation next);
 	void UpwardPathRecur(Flocation next);
-	void RandomPathRecur(Flocation next);
-
+	void EuclidianPathRecur(Flocation next);
+	TArray<DIRECTION> FindEuclidianDir(int x, int y, int z);
+	//Neighbor get_single_neighbor_by_tf(Flocation loc, DIRECTION dir);
 
 	void MazeHelper();
+
+
+	UFUNCTION(BlueprintCallable)
+	void ClearBBREFS();
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnBlockAtLocation(Flocation loc);
 
 
 

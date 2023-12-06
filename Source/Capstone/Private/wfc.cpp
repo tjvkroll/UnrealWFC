@@ -10,8 +10,6 @@ void Awfc::BeginPlay()
 {
     //CreateMaze();
     PrimaryActorTick.bCanEverTick = false;
-    
-    
 }
 
 int16 Awfc::At(int8 x, int8 y, int8 z)
@@ -62,49 +60,96 @@ TArray<Awfc::Neighbor> Awfc::get_neighbors(Flocation loc, int8 h)
     return neighborTup;
 }
 
+bool Awfc::CheckDirection(Flocation loc, DIRECTION dir) {
+    switch (dir) {
+    case DIRECTION::EAST:
+        return (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::EAST] ==
+            true &&
+            loc.x < height - 1);
+        break;
+    case DIRECTION::WEST:
+        return (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::WEST] ==
+            true &&
+            loc.x != 0);
+        break; 
+
+    case DIRECTION::NORTH:
+        return (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::NORTH] ==
+            true &&
+            loc.y != 0);
+        break; 
+    case DIRECTION::SOUTH:
+        return (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::SOUTH] ==
+            true &&
+            loc.y < height - 1);
+        break;
+    case DIRECTION::UP:
+        return (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::UP] ==
+            true &&
+            loc.z < height - 1);
+        break;
+    case DIRECTION::DOWN:
+        return  (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::DOWN] == true &&
+            loc.z != 0);
+        break; 
+    default:
+        return false;
+        break; 
+    }
+
+    return false; 
+}
 
 
-// DONE
 TArray<Awfc::Neighbor> Awfc::get_neighbors_by_tf(Flocation loc)
 {
     TArray<Neighbor> neighborTup;
-
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::WEST] ==
-        true &&
-        loc.x != 0)
-        neighborTup.Add(
-            Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::NORTH] ==
-        true &&
-        loc.y != 0)
-        neighborTup.Add(
-            Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::EAST] ==
-        true &&
-        loc.x < height - 1)
-        neighborTup.Add(
-            Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z)));
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::SOUTH] ==
-        true &&
-        loc.y < height - 1)
-        neighborTup.Add(
-            Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z)));
-
-    // NEW CHANGES FOR 3D
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::DOWN] == true &&
-        loc.z != 0) {
-        neighborTup.Add(
-            Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1)));
-    }
-    if (tilemap[At(loc.x, loc.y, loc.z)]->superPositionsTSC[0].GetDefaultObject()->connections[(int8)DIRECTION::UP] ==
-        true &&
-        loc.z < height - 1) {
-        neighborTup.Add(
-            Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1)));
-    }
-
+    if (CheckDirection(loc, DIRECTION::WEST)) neighborTup.Add(Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::NORTH)) neighborTup.Add(Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z)));
+    if (CheckDirection(loc, DIRECTION::DOWN)) neighborTup.Add(Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1))); 
+    if (CheckDirection(loc, DIRECTION::SOUTH)) neighborTup.Add(Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z)));
+    if (CheckDirection(loc, DIRECTION::EAST)) neighborTup.Add(Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::UP)) neighborTup.Add(Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1)));
     return neighborTup;
 }
+
+
+//Awfc::Neighbor Awfc::get_single_neighbor_by_tf(Flocation loc, DIRECTION dir)
+//{
+//    if (dir == DIRECTION::WEST && CheckDirection(loc, DIRECTION::WEST)) return Awfc::Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z));
+//    else if (dir == DIRECTION::NORTH && CheckDirection(loc, DIRECTION::NORTH)) return Awfc::Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z));
+//    else if (dir == DIRECTION::DOWN && CheckDirection(loc, DIRECTION::DOWN)) return Awfc::Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1));
+//    else if (dir == DIRECTION::SOUTH && CheckDirection(loc, DIRECTION::SOUTH)) return Awfc::Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z));
+//    else if (dir == DIRECTION::EAST && CheckDirection(loc, DIRECTION::EAST)) return Awfc::Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z));
+//    else if (dir == DIRECTION::UP && CheckDirection(loc, DIRECTION::UP)) return Awfc::Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1));
+//
+//    return ; 
+//}
+
+TArray<Awfc::Neighbor> Awfc::RM_get_neighbors_by_tf(Flocation loc)
+{
+    TArray<Neighbor> neighborTup;
+    if (CheckDirection(loc, DIRECTION::WEST)) neighborTup.Add(Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::UP)) neighborTup.Add(Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1)));
+    if (CheckDirection(loc, DIRECTION::SOUTH)) neighborTup.Add(Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z)));
+    if (CheckDirection(loc, DIRECTION::DOWN)) neighborTup.Add(Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1)));
+    if (CheckDirection(loc, DIRECTION::EAST)) neighborTup.Add(Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::NORTH)) neighborTup.Add(Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z)));
+    return neighborTup;
+}
+
+TArray<Awfc::Neighbor> Awfc::UM_get_neighbors_by_tf(Flocation loc)
+{
+    TArray<Neighbor> neighborTup;
+    if (CheckDirection(loc, DIRECTION::DOWN)) neighborTup.Add(Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1)));
+    if (CheckDirection(loc, DIRECTION::SOUTH)) neighborTup.Add(Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z)));
+    if (CheckDirection(loc, DIRECTION::EAST)) neighborTup.Add(Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::NORTH)) neighborTup.Add(Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z)));
+    if (CheckDirection(loc, DIRECTION::WEST)) neighborTup.Add(Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z)));
+    if (CheckDirection(loc, DIRECTION::UP)) neighborTup.Add(Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1)));
+    return neighborTup;
+}
+
 
 
 // DONE
@@ -174,11 +219,6 @@ bool Awfc::updatesRequired()
     return needsUpdate;
 }
 
-
-
-
-// DEALING WITH INSTANCE OF BLOCKS
-
 // DONE
 void Awfc::resetUpdateValues()
 {
@@ -193,32 +233,19 @@ void Awfc::resetUpdateValues()
 }
 
 
-// WIP 
+// DONE 
 bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>>& sourceSuperPositions)
 {
-    //QLOG("Adding Constraints");
     neighbor.loc.Display();
     int idxcur = At(neighbor);
-    //QLOGFMT("%d", idxcur);
     // Get the sides of each tile we'll be constraining by
     DIRECTION incDirection = neighbor.dir;
     DIRECTION outDirection = reverse(incDirection);
     bool changed = false;
     TSet<bool> neighborConstraint;
-    /*if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) {
-        QLOGFMT("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 B4 %d", tilemap[At(neighbor)]->superPositionsTSC.Num());
-    }
-    QLOGFMT("IncDir: %d", (int8)incDirection);
-    QLOGFMT("OutDir: %d", (int8)outDirection);*/
 
-    // Get set of constraints from our source tile
-    //////////////////////////////////////////////////////////// SourceSuperPositions are not collapsing
-    //QLOGFMT("SRCSUPPOS: %d", sourceSuperPositions.Num());
     for (auto& superPosition : sourceSuperPositions) {
-        //QLOGFMT("SuperPos: %s", *superPosition.GetDefaultObject()->name);
         FString v = superPosition.GetDefaultObject()->connections[(int8)outDirection] ? "True" : "False";
-        //QLOGFMT("SuperPos: %s", *v);
-
         neighborConstraint.Add(superPosition.GetDefaultObject()->connections[(int8)outDirection]);
     }
     for (auto& cb : neighborConstraint) { FString isvalidstr = cb ? "True" : "False"; QLOGFMT("%s", *isvalidstr); }
@@ -233,9 +260,6 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
                 changed = true;
             }
         }
-        //if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) { 
-            //QLOGFMT("REMOVING: %d", indicies_to_remove.Num());
-        //}
         // Remove building blocks that don't fit based on the constraints of our source
         for (int8 i = indicies_to_remove.Num() - 1; i >= 0; i--) {
             if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) { QLOGFMT("%s", *tilemap[At(neighbor)]->superPositionsTSC[indicies_to_remove[i]].GetDefaultObject()->name); }
@@ -247,45 +271,28 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
     if ((int8)tilemap[At(neighbor)]->superPositionsTSC.Num() == 0) {
         throw std::runtime_error("No patterns left at Flocation.");
     }
-   /* if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) { QLOGFMT("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 AFTER %d", tilemap[At(neighbor)]->superPositionsTSC.Num()); }
-
-    UE_LOG(LogTemp, Warning, TEXT("------------------------"));*/
     return changed;
 }
 
 
-
-
-
-// DEALING WITH INSTANCE OF BLOCKS  (266-267)
-
 // DONE? 
 void Awfc::Propogate(Flocation next_Flocation)
 {
-    //QLOG("------------------+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+ FROM:");
+   
     next_Flocation.Display();
     if (tilemap[At(next_Flocation)]->superPositionsTSC.Num() == 0) {
         QLOG("EMPTY TSC!");
         return;
     }
-    /*QLOGFMT("Block name: %s", *tilemap[At(next_Flocation)]->superPositionsTSC[0].GetDefaultObject()->name);
-    QLOG("------------------ ");
-    UE_LOG(LogTemp, Warning, TEXT("In Propagate"))
-    QLOGFMT("SRCSUPPOS-B: %d", tilemap[At(next_Flocation)]->superPositionsTSC.Num());*/
 
-    //UE_LOG(LogTemp, Warning, TEXT(" "));
-    //UE_LOG(LogTemp, Warning, TEXT("++++++++++++++++++++++++++"));
-    //UE_LOG(LogTemp, Warning, TEXT(" "));
     // sets our starting point for propagation
     resetUpdateValues();
     tilemap[At(next_Flocation)]->needsUpdate = true;
     // Loop to continue propagating until there are no more tiles that have been
-    // constrained
     while (updatesRequired()) {
         // Gathers a list of Flocations that need to be propagated from
         TArray<Flocation> Flocations = get_locations_requiring_updates();
         resetUpdateValues();
-        //QLOGFMT("Locations count: %d", Flocations.Num());
         for (auto& Flocation : Flocations) {
             Flocation.Display();
             // Gets all neighbors of the Flocation we're propagating from
@@ -294,8 +301,6 @@ void Awfc::Propogate(Flocation next_Flocation)
                 // Applying constraints to each neighbor of our source(Flocation)
                 bool wasUpdated; 
                 try {
-                    //QLOGFMT("SRCSUPPOS-C: %d", tilemap[At(next_Flocation)]->superPositionsTSC.Num());
-                    //QLOGFMT("SRCSUPPOS-A: %d", tilemap[At(Flocation)]->superPositionsTSC.Num());
                     wasUpdated = add_constraint(neighbor, tilemap[At(Flocation)]->superPositionsTSC);
                 }
                 catch (...) {
@@ -337,9 +342,7 @@ void Awfc::Iterate()
 void Awfc::IterateSpecific(int8 x, int8 y, int8 z, FString name)
 {
     tilemap[At(x, y, z)]->CollapseSpecific(name);
-    //QLOGFMT("SP_num after collapseSpecfic: %d", tilemap[At(x, y, z)]->superPositionsTSC.Num());
     if (tilemap[At(x, y, z)]->superPositionsTSC.Num() == 1) {
-        //QLOGFMT("SP_name: %s", *tilemap[At(x, y, z)]->superPositionsTSC[0].GetDefaultObject()->name);
     }
     Flocation collapsed(x, y, z);
     try {
@@ -408,7 +411,7 @@ bool Awfc::validPath(int8 choice)
     if (choice == 0) { LeftMostPathRecur(Flocation(start.x, start.y, start.z)); LMP_steps = LeftMostPath.Num(); }
     else if (choice == 1) { RightMostPathRecur(Flocation(start.x, start.y, start.z)); RMP_steps = RightMostPath.Num();}
     else if (choice == 2) { UpwardPathRecur(Flocation(start.x, start.y, start.z)); UMP_steps = UpMostPath.Num(); }
-    else if (choice == 3) { RandomPathRecur(Flocation(start.x, start.y, start.z)); Rando_steps = RandomPath.Num(); }
+    else if (choice == 3) { EuclidianPathRecur(Flocation(start.x, start.y, start.z)); Euclidian_steps = EuclidianPath.Num(); }
 
     // debugging option 
     else if (choice == 10) { validPathRecur(Flocation(start.x, start.y, start.z)); LMP_steps = LeftMostPath.Num(); }
@@ -420,11 +423,13 @@ bool Awfc::validPath(int8 choice)
     return false;
 }
 
-
 //Basic
 void Awfc::validPathRecur(Flocation next)
 {
+    if (finish_found == true) return; 
+    
     tilemap[At(next.x, next.y, next.z)]->visited = true;
+
 
     // Add Flocation to list
     LeftMostPath.Add(next);
@@ -432,6 +437,14 @@ void Awfc::validPathRecur(Flocation next)
     TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
 
     for (auto& neighbor : tile_neighbors) {
+
+        if (neighbor.loc.x == finish.x && neighbor.loc.y == finish.y && neighbor.loc.z == finish.z) {
+            finish_found = true;
+            tilemap[At(finish.x, finish.y, finish.z)]->visited = true;
+            LeftMostPath.Add(neighbor.loc);
+            return; 
+        }
+
         if (tilemap[At(neighbor)]
             ->visited == false) {
             validPathRecur(neighbor.loc);
@@ -443,6 +456,9 @@ void Awfc::validPathRecur(Flocation next)
 //LeftMost
 void Awfc::LeftMostPathRecur(Flocation next)
 {
+
+    if (finish_found == true) return;
+
     tilemap[At(next.x, next.y, next.z)]->visited = true;
 
     // Add Flocation to list
@@ -451,15 +467,13 @@ void Awfc::LeftMostPathRecur(Flocation next)
     TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
     
     for (auto& neighbor : tile_neighbors) {
-        if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::WEST) {
-            LeftMostPathRecur(neighbor.loc);
+        if (neighbor.loc.x == finish.x && neighbor.loc.y == finish.y && neighbor.loc.z == finish.z) {
+            finish_found = true;
+            tilemap[At(finish.x, finish.y, finish.z)]->visited = true;
+            LeftMostPath.Add(neighbor.loc);
+            return;
         }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::SOUTH) {
-            LeftMostPathRecur(neighbor.loc);
-        }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::DOWN) {
-            LeftMostPathRecur(neighbor.loc);
-        }
+
         if (tilemap[At(neighbor)]->visited == false) {
             LeftMostPathRecur(neighbor.loc);
         }
@@ -471,23 +485,25 @@ void Awfc::LeftMostPathRecur(Flocation next)
 //RightMost
 void Awfc::RightMostPathRecur(Flocation next)
 {
+
+    if (finish_found == true) return;
+
     tilemap[At(next.x, next.y, next.z)]->visited = true;
 
     // Add Flocation to list
     RightMostPath.Add(next);
 
-    TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
+    TArray<Neighbor> tile_neighbors = RM_get_neighbors_by_tf(next);
 
     for (auto& neighbor : tile_neighbors) {
-        if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::EAST) {
-            RightMostPathRecur(neighbor.loc);
+
+        if (neighbor.loc.x == finish.x && neighbor.loc.y == finish.y && neighbor.loc.z == finish.z) {
+            finish_found = true;
+            tilemap[At(finish.x, finish.y, finish.z)]->visited = true;
+            RightMostPath.Add(neighbor.loc);
+            return;
         }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::SOUTH) {
-            RightMostPathRecur(neighbor.loc);
-        }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::DOWN) {
-            RightMostPathRecur(neighbor.loc);
-        }
+
         if (tilemap[At(neighbor)]->visited == false) {
             RightMostPathRecur(neighbor.loc);
         }
@@ -499,23 +515,25 @@ void Awfc::RightMostPathRecur(Flocation next)
 //Upward
 void Awfc::UpwardPathRecur(Flocation next)
 {
+
+    if (finish_found == true) return;
+
     tilemap[At(next.x, next.y, next.z)]->visited = true;
 
     // Add Flocation to list
     UpMostPath.Add(next);
 
-    TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
+    TArray<Neighbor> tile_neighbors = UM_get_neighbors_by_tf(next);
 
     for (auto& neighbor : tile_neighbors) {
-        if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::DOWN) {
-            UpwardPathRecur(neighbor.loc);
+
+        if (neighbor.loc.x == finish.x && neighbor.loc.y == finish.y && neighbor.loc.z == finish.z) {
+            finish_found = true;
+            tilemap[At(finish.x, finish.y, finish.z)]->visited = true;
+            UpMostPath.Add(neighbor.loc);
+            return;
         }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::SOUTH) {
-            UpwardPathRecur(neighbor.loc);
-        }
-        else if (tilemap[At(neighbor)]->visited == false && neighbor.dir == DIRECTION::WEST) {
-            UpwardPathRecur(neighbor.loc);
-        }
+
         if (tilemap[At(neighbor)]->visited == false) {
             UpwardPathRecur(neighbor.loc);
         }
@@ -523,21 +541,146 @@ void Awfc::UpwardPathRecur(Flocation next)
 }
 
 
+
+TArray<DIRECTION> Awfc::FindEuclidianDir(int x, int y, int z) {
+    TArray<DIRECTION> Priority;
+    if (abs(x) >= abs(y)) {
+        if (abs(x) >= abs(z)) {
+            // x is priority now decide which dir to travel
+            if (x >= 0) { Priority.Add(DIRECTION::EAST);}
+            else { Priority.Add(DIRECTION::WEST); }
+            // Add 2 other priorities
+            if (abs(y) >= abs(z)) {
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+                
+                if (z >= 0) { Priority.Add(DIRECTION::UP); }
+                else { Priority.Add(DIRECTION::DOWN); }
+            }
+            else {
+                if (z >= 0) { Priority.Add(DIRECTION::UP); }
+                else { Priority.Add(DIRECTION::DOWN); }
+                
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+            }
+        }
+        else {
+            // z is priority now decide which dir to travel
+            if (z >= 0) { Priority.Add(DIRECTION::UP); }
+            else { Priority.Add(DIRECTION::DOWN); }
+            // Add 2 other priorities
+            if (abs(y) >= abs(x)) {
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+            }
+            else {
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+            }
+
+        }
+    }
+    else {
+        if (abs(y) >= abs(z)) {
+            // y is priority now decide which dir to travel
+            if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+            else { Priority.Add(DIRECTION::NORTH); }
+            if (abs(x) > abs(z)) {
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+
+                if (z >= 0) { Priority.Add(DIRECTION::UP); }
+                else { Priority.Add(DIRECTION::DOWN); }
+            }
+            else {
+                if (z >= 0) { Priority.Add(DIRECTION::UP); }
+                else { Priority.Add(DIRECTION::DOWN); }
+                
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+            }
+        }
+        else {
+            // z is priority now decide which dir to travel
+            if (z >= 0) { Priority.Add(DIRECTION::UP); }
+            else { Priority.Add(DIRECTION::DOWN); }
+            if (abs(x) > abs(y)) {
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+            }
+            else {
+                if (y >= 0) { Priority.Add(DIRECTION::SOUTH); }
+                else { Priority.Add(DIRECTION::NORTH); }
+
+                if (x >= 0) { Priority.Add(DIRECTION::EAST); }
+                else { Priority.Add(DIRECTION::WEST); }
+            }
+        }
+    }
+    return Priority; 
+}
+
+
+
 //Random
-void Awfc::RandomPathRecur(Flocation next)
+void Awfc::EuclidianPathRecur(Flocation next)
 {
+    if (finish_found == true) return;
+    
     tilemap[At(next.x, next.y, next.z)]->visited = true;
+
+    TArray<Neighbor> tile_neighbors;
+    
     // Add Flocation to list
-    RandomPath.Add(next);
-    TArray<Neighbor> tile_neighbors = get_neighbors_by_tf(next);
+    EuclidianPath.Add(next);
 
+    // LOGIC TO FIGURE +/- for x, y, z
+    TArray<DIRECTION> Priorities = FindEuclidianDir(finish.x - next.x, finish.y - next.y, finish.z - next.z);
 
-    // MIGHT NOT LOGICALLY WORK?? might need to have a longer loop
+    // Get list of neighbors by priority
+    for (auto& dir : Priorities) {
+
+        if (dir == DIRECTION::WEST && CheckDirection(next, DIRECTION::WEST)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::EAST, Flocation(next.x - 1, next.y, next.z)));
+        else if (dir == DIRECTION::NORTH && CheckDirection(next, DIRECTION::NORTH)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::SOUTH, Flocation(next.x, next.y - 1, next.z)));
+        else if (dir == DIRECTION::DOWN && CheckDirection(next, DIRECTION::DOWN)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::UP, Flocation(next.x, next.y, next.z - 1)));
+        else if (dir == DIRECTION::SOUTH && CheckDirection(next, DIRECTION::SOUTH)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::NORTH, Flocation(next.x, next.y + 1, next.z)));
+        else if (dir == DIRECTION::EAST && CheckDirection(next, DIRECTION::EAST)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::WEST, Flocation(next.x + 1, next.y, next.z)));
+        else if (dir == DIRECTION::UP && CheckDirection(next, DIRECTION::UP)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::DOWN, Flocation(next.x, next.y, next.z + 1)));
+    }
+    
+    // fill remainder of list by inverse priority
+    for (int i = Priorities.Num() - 1; i >= 0; i--) {
+        DIRECTION dir = reverse(Priorities[i]);
+
+        if (dir == DIRECTION::WEST && CheckDirection(next, DIRECTION::WEST)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::EAST, Flocation(next.x - 1, next.y, next.z)));
+        else if (dir == DIRECTION::NORTH && CheckDirection(next, DIRECTION::NORTH)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::SOUTH, Flocation(next.x, next.y - 1, next.z)));
+        else if (dir == DIRECTION::DOWN && CheckDirection(next, DIRECTION::DOWN)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::UP, Flocation(next.x, next.y, next.z - 1)));
+        else if (dir == DIRECTION::SOUTH && CheckDirection(next, DIRECTION::SOUTH)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::NORTH, Flocation(next.x, next.y + 1, next.z)));
+        else if (dir == DIRECTION::EAST && CheckDirection(next, DIRECTION::EAST)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::WEST, Flocation(next.x + 1, next.y, next.z)));
+        else if (dir == DIRECTION::UP && CheckDirection(next, DIRECTION::UP)) tile_neighbors.Add(Awfc::Neighbor(DIRECTION::DOWN, Flocation(next.x, next.y, next.z + 1)));
+    }
 
     for (auto& neighbor : tile_neighbors) {
-        int8 rando = rand() % (tile_neighbors.Num());
-        if (tilemap[At(tile_neighbors[rando])]->visited == false) {
-            RandomPathRecur(neighbor.loc);
+
+        if (neighbor.loc.x == finish.x && neighbor.loc.y == finish.y && neighbor.loc.z == finish.z) {
+            finish_found = true;
+            tilemap[At(finish.x, finish.y, finish.z)]->visited = true;
+            EuclidianPath.Add(neighbor.loc);
+            return;
+        }
+
+        if (tilemap[At(neighbor)]->visited == false) {
+            EuclidianPathRecur(neighbor.loc);
         }
     }
 }
@@ -546,7 +689,7 @@ void Awfc::RandomPathRecur(Flocation next)
 
 // This is where I can call all of my different solvers
 void Awfc::SolveMaze() {
-    if (Already_Solved) {
+    if (Already_Solved || !Already_Generated) {
         return; 
     }
     
@@ -554,10 +697,12 @@ void Awfc::SolveMaze() {
     
     // this is actually running the OG path recur as a test 
     LMP_solved = validPath(10);
-    
+    finish_found = false; 
     RMP_solved = validPath(1);
+    finish_found = false;
     UMP_solved = validPath(2);
-    Rando_solved = validPath(3);
+    finish_found = false;
+    Euclidian_solved = validPath(3);
 
     LogTilemap();
     Already_Solved = true; 
@@ -604,8 +749,7 @@ void Awfc::MazeHelper()
     }
 }
 
-
-// Debugging helper mostly : NOT CURRENTLY BEING CALLED
+// Debugging helper mostly
 void Awfc::LogTilemap() {
 
     UE_LOG(LogTemp, Warning, TEXT("------ START -------"));
@@ -629,8 +773,8 @@ void Awfc::LogTilemap() {
         s.Display();
     }
     
-    UE_LOG(LogTemp, Warning, TEXT("------RANDOM MOST PATH: %s -------"), Rando_solved? TEXT("True") : TEXT("False"));
-    for (auto& s : RandomPath) {
+    UE_LOG(LogTemp, Warning, TEXT("------Euclidian PATH: %s -------"), Euclidian_solved? TEXT("True") : TEXT("False"));
+    for (auto& s : EuclidianPath) {
         s.Display();
     }
 
@@ -643,7 +787,6 @@ void Awfc::Solidify()
         BB_refs.Add(Block->Solidify());
     }
 }
-
 
 void Awfc::CreateMaze() {
     if (Already_Generated) {
@@ -687,28 +830,32 @@ void Awfc::ClearTiles()
     LeftMostPath.Empty();
     RightMostPath.Empty();
     UpMostPath.Empty();
-    RandomPath.Empty();
+    EuclidianPath.Empty();
 
     LMP_steps = 0; 
     RMP_steps = 0;
     UMP_steps = 0; 
-    Rando_steps = 0; 
+    Euclidian_steps = 0; 
 
     LMP_solved = false; 
     RMP_solved = false; 
     UMP_solved = false; 
-    Rando_solved = false; 
+    Euclidian_solved = false; 
 
 
     Already_Generated = false; 
     Already_Solved = false; 
 }
 
-void Awfc::HighlightLocations(TArray<Flocation> path) {
-    for (int i = 0; i < tilemap.Num(); i++) {
-        BB_refs[i]->HighlightBlock(false);
+void Awfc::ClearBBREFS()
+{
+    for (int i = 0; i < BB_refs.Num(); i++) {
+        BB_refs[i]->Destroy();
     }
-    for (auto& loc : path) {
-        BB_refs[At(loc)]->HighlightBlock(true);
-    }
+    BB_refs.Empty();
+}
+
+void Awfc::SpawnBlockAtLocation(Flocation loc)
+{
+    BB_refs.Add(tilemap[At(loc)]->Solidify());
 }
