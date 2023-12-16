@@ -60,6 +60,11 @@ TArray<Awfc::Neighbor> Awfc::get_neighbors(Flocation loc, int8 h)
     return neighborTup;
 }
 
+
+
+
+
+
 bool Awfc::CheckDirection(Flocation loc, DIRECTION dir) {
     switch (dir) {
     case DIRECTION::EAST:
@@ -113,19 +118,6 @@ TArray<Awfc::Neighbor> Awfc::get_neighbors_by_tf(Flocation loc)
     return neighborTup;
 }
 
-
-//Awfc::Neighbor Awfc::get_single_neighbor_by_tf(Flocation loc, DIRECTION dir)
-//{
-//    if (dir == DIRECTION::WEST && CheckDirection(loc, DIRECTION::WEST)) return Awfc::Neighbor(DIRECTION::EAST, Flocation(loc.x - 1, loc.y, loc.z));
-//    else if (dir == DIRECTION::NORTH && CheckDirection(loc, DIRECTION::NORTH)) return Awfc::Neighbor(DIRECTION::SOUTH, Flocation(loc.x, loc.y - 1, loc.z));
-//    else if (dir == DIRECTION::DOWN && CheckDirection(loc, DIRECTION::DOWN)) return Awfc::Neighbor(DIRECTION::UP, Flocation(loc.x, loc.y, loc.z - 1));
-//    else if (dir == DIRECTION::SOUTH && CheckDirection(loc, DIRECTION::SOUTH)) return Awfc::Neighbor(DIRECTION::NORTH, Flocation(loc.x, loc.y + 1, loc.z));
-//    else if (dir == DIRECTION::EAST && CheckDirection(loc, DIRECTION::EAST)) return Awfc::Neighbor(DIRECTION::WEST, Flocation(loc.x + 1, loc.y, loc.z));
-//    else if (dir == DIRECTION::UP && CheckDirection(loc, DIRECTION::UP)) return Awfc::Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1));
-//
-//    return ; 
-//}
-
 TArray<Awfc::Neighbor> Awfc::RM_get_neighbors_by_tf(Flocation loc)
 {
     TArray<Neighbor> neighborTup;
@@ -149,8 +141,6 @@ TArray<Awfc::Neighbor> Awfc::UM_get_neighbors_by_tf(Flocation loc)
     if (CheckDirection(loc, DIRECTION::UP)) neighborTup.Add(Neighbor(DIRECTION::DOWN, Flocation(loc.x, loc.y, loc.z + 1)));
     return neighborTup;
 }
-
-
 
 // DONE
 Flocation Awfc::get_location_with_fewest_choices()
@@ -181,7 +171,6 @@ Flocation Awfc::get_location_with_fewest_choices()
     }
 }
 
-
 // DONE
 TArray<Flocation> Awfc::get_locations_requiring_updates()
 {
@@ -189,9 +178,7 @@ TArray<Flocation> Awfc::get_locations_requiring_updates()
 
     // PRAGMA CANDIDATE
     for (int8 layer = 0; layer < height; layer++) {
-//#pragma omp parallel for num_threads(threads)
         for (int8 row = 0; row < height; row++) {
-//#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < height; col++) {
                 if (tilemap[At(col, row, layer)]->needsUpdate)
                     locs.Add(Flocation(col, row, layer));
@@ -201,16 +188,13 @@ TArray<Flocation> Awfc::get_locations_requiring_updates()
     return locs;
 }
 
-
 // DONE
 bool Awfc::updatesRequired()
 {
     bool needsUpdate = false;
 
     for (int8 layer = 0; layer < height; layer++) {
-    //#pragma omp parallel for num_threads(threads)
         for (int8 row = 0; row < height; row++) {
-    //#pragma omp parallel for num_threads(threads)
             for (int8 col = 0; col < height; col++) {
                 if (tilemap[At(col, row, layer)]->needsUpdate) needsUpdate = true;
             }
@@ -223,7 +207,6 @@ bool Awfc::updatesRequired()
 void Awfc::resetUpdateValues()
 {
     for (int8 layer = 0; layer < height; layer++) {
-//#pragma omp parallel for num_threads(threads)
         for (int8 row = 0; row < height; row++) {
             for (int8 col = 0; col < height; col++) {
                 tilemap[At(col, row, layer)]->needsUpdate = false;
@@ -232,12 +215,11 @@ void Awfc::resetUpdateValues()
     }
 }
 
-
 // DONE 
 bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>>& sourceSuperPositions)
 {
-    neighbor.loc.Display();
-    int idxcur = At(neighbor);
+   /* neighbor.loc.Display();
+    int idxcur = At(neighbor);*/
     // Get the sides of each tile we'll be constraining by
     DIRECTION incDirection = neighbor.dir;
     DIRECTION outDirection = reverse(incDirection);
@@ -245,10 +227,10 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
     TSet<bool> neighborConstraint;
 
     for (auto& superPosition : sourceSuperPositions) {
-        FString v = superPosition.GetDefaultObject()->connections[(int8)outDirection] ? "True" : "False";
+        //FString v = superPosition.GetDefaultObject()->connections[(int8)outDirection] ? "True" : "False";
         neighborConstraint.Add(superPosition.GetDefaultObject()->connections[(int8)outDirection]);
     }
-    for (auto& cb : neighborConstraint) { FString isvalidstr = cb ? "True" : "False"; QLOGFMT("%s", *isvalidstr); }
+    //for (auto& cb : neighborConstraint) { FString isvalidstr = cb ? "True" : "False"; QLOGFMT("%s", *isvalidstr); }
     // Only want to constrain neighbors that haven't collapsed
     if ((int8)tilemap[At(neighbor)]->superPositionsTSC.Num() != 1) {
         TArray<int8> indicies_to_remove;
@@ -262,7 +244,7 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
         }
         // Remove building blocks that don't fit based on the constraints of our source
         for (int8 i = indicies_to_remove.Num() - 1; i >= 0; i--) {
-            if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) { QLOGFMT("%s", *tilemap[At(neighbor)]->superPositionsTSC[indicies_to_remove[i]].GetDefaultObject()->name); }
+            //if (neighbor.loc.x == 1 && neighbor.loc.y == 1 && neighbor.loc.z == 1) { QLOGFMT("%s", *tilemap[At(neighbor)]->superPositionsTSC[indicies_to_remove[i]].GetDefaultObject()->name); }
             tilemap[At(neighbor)]->RemoveSuperPositionAtIndex(indicies_to_remove[i]);
         }
     }
@@ -274,12 +256,11 @@ bool Awfc::add_constraint(Neighbor& neighbor, TArray<TSubclassOf<ABuildingBlock>
     return changed;
 }
 
-
 // DONE? 
 void Awfc::Propogate(Flocation next_Flocation)
 {
    
-    next_Flocation.Display();
+    //next_Flocation.Display();
     if (tilemap[At(next_Flocation)]->superPositionsTSC.Num() == 0) {
         QLOG("EMPTY TSC!");
         return;
@@ -294,7 +275,7 @@ void Awfc::Propogate(Flocation next_Flocation)
         TArray<Flocation> Flocations = get_locations_requiring_updates();
         resetUpdateValues();
         for (auto& Flocation : Flocations) {
-            Flocation.Display();
+            //Flocation.Display();
             // Gets all neighbors of the Flocation we're propagating from
             TArray<Neighbor> neighbors = get_neighbors(Flocation, height);
             for (auto& neighbor : neighbors) {
@@ -337,7 +318,6 @@ void Awfc::Iterate()
     }
 }
 
-
 // DONE
 void Awfc::IterateSpecific(int8 x, int8 y, int8 z, FString name)
 {
@@ -352,7 +332,6 @@ void Awfc::IterateSpecific(int8 x, int8 y, int8 z, FString name)
         UE_LOG(LogTemp, Warning, TEXT("Caught Propagate!"));
     }
 }
-
 
 // DONE
 bool Awfc::validate()
@@ -394,7 +373,6 @@ void Awfc::WFCInit()
         }
     }
 }
-
 
 // DONE
 bool Awfc::validPath(int8 choice)
@@ -452,7 +430,6 @@ void Awfc::validPathRecur(Flocation next)
     }
 }
 
-
 //LeftMost
 void Awfc::LeftMostPathRecur(Flocation next)
 {
@@ -480,7 +457,6 @@ void Awfc::LeftMostPathRecur(Flocation next)
     }
 
 }
-
 
 //RightMost
 void Awfc::RightMostPathRecur(Flocation next)
@@ -511,7 +487,6 @@ void Awfc::RightMostPathRecur(Flocation next)
 
 }
 
-
 //Upward
 void Awfc::UpwardPathRecur(Flocation next)
 {
@@ -539,8 +514,6 @@ void Awfc::UpwardPathRecur(Flocation next)
         }
     }
 }
-
-
 
 TArray<DIRECTION> Awfc::FindEuclidianDir(int x, int y, int z) {
     TArray<DIRECTION> Priority;
@@ -630,8 +603,6 @@ TArray<DIRECTION> Awfc::FindEuclidianDir(int x, int y, int z) {
     return Priority; 
 }
 
-
-
 //Random
 void Awfc::EuclidianPathRecur(Flocation next)
 {
@@ -685,8 +656,6 @@ void Awfc::EuclidianPathRecur(Flocation next)
     }
 }
 
-
-
 // This is where I can call all of my different solvers
 void Awfc::SolveMaze() {
     if (Already_Solved || !Already_Generated) {
@@ -707,7 +676,6 @@ void Awfc::SolveMaze() {
     LogTilemap();
     Already_Solved = true; 
 }
-
 
 // DONE
 void Awfc::MazeHelper()

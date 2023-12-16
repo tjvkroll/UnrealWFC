@@ -9,12 +9,7 @@
 #include "wfcBlock.h"
 #include "wfc.generated.h"
 
-//enum class EWFCFunctionResponse : uint8 {
-//	EFR_NoMoreTilesToCollapse,
-//	EFR_Worked,
-//	EFR_NoChoiceAtTileLocation
-//};
-
+// location struct for... you guessed it locations
 USTRUCT(BlueprintType)
 struct Flocation {
 	GENERATED_BODY()
@@ -39,33 +34,35 @@ UCLASS()
 class CAPSTONE_API Awfc : public AActor
 {
 	GENERATED_BODY()
-
-
 protected:
-
-	UPROPERTY(EditAnywhere, category = "wfc_data")
-	int LocationOffset;
-
-	TArray<ABuildingBlock*> BB_refs; 
-	bool finish_found; 
-	int8 width;
+	// The meat and potatos 
 	TArray<AwfcBlock*> tilemap;
 
- 	
+	// used to offset the blocks so when they're spawned they are touching but don't overlap
+	UPROPERTY(EditAnywhere, category = "wfc_data")
+	int LocationOffset;
 	
+	// references to building blocks to fill up each cell in tilemap
+	TArray<ABuildingBlock*> BB_refs; 
+	
+	
+	bool finish_found; 
 	Flocation start;
 	Flocation finish; 
 
+	// a single cell in the tilemap
 	UPROPERTY(EditDefaultsOnly, category = "wfc_data")
 	TSubclassOf<AwfcBlock> block_class; 
 
-
+	// struct used in finding a source cells neighbors to propagation and pathing
 	struct Neighbor {
 		Neighbor(DIRECTION d, Flocation l) : dir(d), loc(l) {}
 		DIRECTION dir;
 		Flocation loc; 
 	};
 
+
+	// various helper functions
 	TArray<Neighbor> get_neighbors(Flocation loc, int8 h);
 	Flocation get_location_with_fewest_choices();
 	TArray<Flocation> get_locations_requiring_updates();
@@ -85,7 +82,7 @@ public:
 	Awfc(){}
 	virtual void BeginPlay() override;
 
-
+	// helper functions
 	int16  At(int8 x, int8 y, int8 z);
 	int16  At(const Neighbor& n) const;
 	int16  At(const Flocation& n) const;
@@ -94,12 +91,10 @@ public:
 	bool Already_Generated = false;
 	UPROPERTY(BlueprintReadWrite)
 	bool Already_Solved = false; 
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	int height;
 
-	// Holds all the paths for AI solvers
+	// Solver variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	TArray<Flocation> LeftMostPath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
@@ -127,7 +122,7 @@ public:
 	int Euclidian_steps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "wfc_data")
 	bool Euclidian_solved = false;
-
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool Visualize_LMP = false;
 	UPROPERTY(BlueprintReadWrite)
@@ -138,12 +133,7 @@ public:
 	bool Visualize_Euclidian = false;
 
 
-	UFUNCTION(BlueprintCallable)
-	void ClearTiles();
-	UFUNCTION(BlueprintCallable)
-	void WFCInit();
-	UFUNCTION(BlueprintCallable)
-	void SolveMaze();
+	// C++ only functions
 	void Propogate(Flocation next_Flocation);
 	void Iterate();
 	void IterateSpecific(int8 x, int8 y, int8 z, FString name);
@@ -155,26 +145,25 @@ public:
 	void UpwardPathRecur(Flocation next);
 	void EuclidianPathRecur(Flocation next);
 	TArray<DIRECTION> FindEuclidianDir(int x, int y, int z);
-	//Neighbor get_single_neighbor_by_tf(Flocation loc, DIRECTION dir);
-
 	void MazeHelper();
+	void Solidify();
 
 
+	// Blueprint callable functions
 	UFUNCTION(BlueprintCallable)
 	void ClearBBREFS();
-
 	UFUNCTION(BlueprintCallable)
 	void SpawnBlockAtLocation(Flocation loc);
-
-
-
+	UFUNCTION(BlueprintCallable)
+	void ClearTiles();
+	UFUNCTION(BlueprintCallable)
+	void WFCInit();
+	UFUNCTION(BlueprintCallable)
+	void SolveMaze();
 	UFUNCTION(BlueprintCallable)
 	void CreateMaze();
-	
 	UFUNCTION(BlueprintCallable)
 	void LogTilemap();
-
-	void Solidify();
 };
 
 
